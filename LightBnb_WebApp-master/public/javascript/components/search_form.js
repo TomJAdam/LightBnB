@@ -9,7 +9,7 @@ $(() => {
 
       <div class="search-property-form__field-wrapper">
         <label for="search-property-form__city">Owner ID</label>
-        <input type="text" name="ownerId" placeholder="Owner ID" id="search-property-form__city">
+        <input type="text" name="owner_id" placeholder="Owner ID" id="search-property-form__city">
       </div>
 
       <div class="search-property-form__field-wrapper">
