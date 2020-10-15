@@ -92,7 +92,6 @@ exports.getAllReservations = getAllReservations;
  */
 
 const getAllProperties = function(options, limit) {
-  console.log('options :', options);
   const queryParams = [];
 
   let queryString = `
@@ -106,9 +105,12 @@ const getAllProperties = function(options, limit) {
     queryString += `WHERE city LIKE $${queryParams.length}`;
   }
 
-  if (options.ownerId) {
+  if (options.ownerId && options.city) {
     queryParams.push(options.ownerId);
     queryString += `AND properties.owner_id = $${queryParams.length}`
+  } else if (options.ownerId && !options.city) {
+    queryParams.push(options.ownerId);
+    queryString += `WHERE properties.owner_id = $${queryParams.length}`
   }
 
   queryString += `
@@ -141,7 +143,6 @@ const getAllProperties = function(options, limit) {
   ORDER BY cost_per_night
   LIMIT $${queryParams.length}
   `
-  console.log('queryString/queryParams:', queryString, queryParams);
 
   return pool.query(queryString, queryParams)
   .then(res => res.rows);
@@ -156,9 +157,17 @@ exports.getAllProperties = getAllProperties;
  * @return {Promise<{}>} A promise to the property.
  */
 const addProperty = function(property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
+
+const queryParams = [property.owner_id, property.title, property.description, property.thumbnail_photo_url, property.cover_photo_url, property.cost_per_night, property.parking_spaces, property.number_of_bathrooms, property.number_of_bedrooms, property.street, property.country, property.city, property.province, property.post_code]
+
+
+let queryString = `
+INSERT INTO properties (owner_id, title, description, thumbnail_photo_url, cover_photo_url, cost_per_night, parking_spaces, number_of_bathrooms, number_of_bedrooms, country, street, city, province, post_code)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+RETURNING *;
+`
+
+return pool.query(queryString, queryParams)
+.then(res => res.rows[0])
 }
 exports.addProperty = addProperty;
